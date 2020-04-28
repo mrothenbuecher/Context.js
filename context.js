@@ -3,7 +3,8 @@
  * Copyright Jacob Kelley
  * MIT License
  *
- * Modified by Joshua Christman
+ * Modified by 	Joshua Christman
+ * 				Michael Rothenbücher
  */
 
 context = (function () {
@@ -49,17 +50,23 @@ context = (function () {
 		options = $.extend({}, options, opts);
 	}
 
-	function buildMenu(data, id, subMenu) {
+	function buildMenu(trigger, data, id, subMenu) {
 		var subClass = (subMenu) ? ' dropdown-context-sub' : '',
 			compressed = options.compress ? ' compressed-context' : '',
-			$menu = $('<ul class="dropdown-menu dropdown-context' + subClass + compressed +'" id="dropdown-' + id + '"></ul>');
+			$menu = $('<ul class="context-dropdown-menu dropdown-context' + subClass + compressed +'" id="dropdown-' + id + '"></ul>');
         
-        return buildMenuItems($menu, data, id, subMenu);
+        return buildMenuItems(trigger, $menu, data, id, subMenu);
 	}
 
-    function buildMenuItems($menu, data, id, subMenu, addDynamicTag) {
+    function buildMenuItems(trigger, $menu, data, id, subMenu, addDynamicTag) {
 	    var linkTarget = '';
         for(var i = 0; i<data.length; i++) {
+        	if (typeof data[i].onBeforeShow === 'function') {
+				// if onBeforeShow returns false element will be skipped
+				if(!data[i].onBeforeShow(trigger, data[i])){
+					continue;
+				}
+			}
         	if (typeof data[i].divider !== 'undefined') {
                 var divider = '<li class="divider';
                 divider += (addDynamicTag) ? ' dynamic-menu-item' : '';
@@ -95,7 +102,7 @@ context = (function () {
 					linkTarget = ' target="'+data[i].target+'"';
 				}
 				if (typeof data[i].subMenu !== 'undefined') {
-                    var sub_menu = '<li class="dropdown-submenu';
+                    var sub_menu = '<li class="context-dropdown-submenu';
                     sub_menu += (addDynamicTag) ? ' dynamic-menu-item' : '';
                     sub_menu += '"><a tabindex="-1" href="' + data[i].href + '">' + data[i].text + '</a></li>'
 					$sub = (sub_menu);
@@ -117,7 +124,7 @@ context = (function () {
 				}
 				$menu.append($sub);
 				if (typeof data[i].subMenu != 'undefined') {
-					var subMenuData = buildMenu(data[i].subMenu, id, true);
+					var subMenuData = buildMenu(trigger. data[i].subMenu, id, true);
 					$menu.find('li:last').append(subMenuData);
 				}
 			}
@@ -129,52 +136,48 @@ context = (function () {
     }
 
 	function addContext(selector, data) {
-        if (typeof data.id !== 'undefined' && typeof data.data !== 'undefined') {
-            var id = data.id;
-            $menu = $('body').find('#dropdown-' + id)[0];
-            if (typeof $menu === 'undefined') {
-                $menu = buildMenu(data.data, id);
-                $('body').append($menu);
-            }
-        } else {
-            var d = new Date(),
-                id = d.getTime(),
-                $menu = buildMenu(data, id);
-                $('body').append($menu);
-        }
 
+		var d = new Date(),
+        id = d.getTime();
+		
 		$(selector).on('contextmenu', function (e) {
 			e.preventDefault();
 			e.stopPropagation();
-
+	        
+			$('.dropdown-context:not(.dropdown-context-sub)').hide();
+			
+	        $('#dropdown-' + id).remove();
+	       
+            $menu = buildMenu(e, data, id);
+            $('body').append($menu);
+			
             currentContextSelector = $(this);
 
-			$('.dropdown-context:not(.dropdown-context-sub)').hide();
+			
 
-			$dd = $('#dropdown-' + id);
 
-            $dd.find('.dynamic-menu-item').remove(); // Destroy any old dynamic menu items
-            $dd.find('.dynamic-menu-src').each(function(idx, element) {
+            $menu.find('.dynamic-menu-item').remove(); // Destroy any old dynamic menu items
+            $menu.find('.dynamic-menu-src').each(function(idx, element) {
                 var menuItems = window[$(element).data('src')]($(selector));
                 $parentMenu = $(element).closest('.dropdown-menu.dropdown-context');
-                $parentMenu = buildMenuItems($parentMenu, menuItems, id, undefined, true);
+                $parentMenu = buildMenuItems(e, $parentMenu, menuItems, id, undefined, true);
             });
 
 			if (typeof options.above == 'boolean' && options.above) {
-				$dd.addClass('dropdown-context-up').css({
+				$menu.addClass('dropdown-context-up').css({
 					top: e.pageY - 20 - $('#dropdown-' + id).height(),
 					left: e.pageX - 13
 				}).fadeIn(options.fadeSpeed);
 			} else if (typeof options.above == 'string' && options.above == 'auto') {
-				$dd.removeClass('dropdown-context-up');
-				var autoH = $dd.height() + 12;
+				$menu.removeClass('dropdown-context-up');
+				var autoH = $menu.height() + 12;
 				if ((e.pageY + autoH) > $('html').height()) {
-					$dd.addClass('dropdown-context-up').css({
+					$menu.addClass('dropdown-context-up').css({
 						top: e.pageY - 20 - autoH,
 						left: e.pageX - 13
 					}).fadeIn(options.fadeSpeed);
 				} else {
-					$dd.css({
+					$menu.css({
 						top: e.pageY + 10,
 						left: e.pageX - 13
 					}).fadeIn(options.fadeSpeed);
@@ -182,14 +185,14 @@ context = (function () {
 			}
 
             if (typeof options.left == 'boolean' && options.left) {
-                $dd.addClass('dropdown-context-left').css({
+            	$menu.addClass('dropdown-context-left').css({
                     left: e.pageX - $dd.width()
                 }).fadeIn(options.fadeSpeed);
             } else if (typeof options.left == 'string' && options.left == 'auto') {
-                $dd.removeClass('dropdown-context-left');
-                var autoL = $dd.width() - 12;
+            	$menu.removeClass('dropdown-context-left');
+                var autoL = $menu.width() - 12;
                 if ((e.pageX + autoL) > $('html').width()) {
-                    $dd.addClass('dropdown-context-left').css({
+                	$menu.addClass('dropdown-context-left').css({
                         left: e.pageX - $dd.width() + 13
                     });
                 }
