@@ -4,10 +4,16 @@
  * MIT License
  *
  * Modified by 	Joshua Christman
- * 				Michael Rothenbücher
+ * 		Michael Rothenbücher
  */
 
 context = (function () {
+	
+	var createCallback = function(func) {
+	    return function(event) { func(event, currentContextSelector) };
+	};
+
+	currentContextSelector = undefined;
 
 	var options = {
 		fadeSpeed: 100,
@@ -50,20 +56,20 @@ context = (function () {
 		options = $.extend({}, options, opts);
 	}
 
-	function buildMenu(trigger, data, id, subMenu) {
+	function buildMenu(data, id, subMenu) {
 		var subClass = (subMenu) ? ' dropdown-context-sub' : '',
 			compressed = options.compress ? ' compressed-context' : '',
 			$menu = $('<ul class="context-dropdown-menu dropdown-context' + subClass + compressed +'" id="dropdown-' + id + '"></ul>');
         
-        return buildMenuItems(trigger, $menu, data, id, subMenu);
+        return buildMenuItems($menu, data, id, subMenu);
 	}
 
-    function buildMenuItems(trigger, $menu, data, id, subMenu, addDynamicTag) {
+    function buildMenuItems($menu, data, id, subMenu, addDynamicTag) {
 	    var linkTarget = '';
         for(var i = 0; i<data.length; i++) {
         	if (typeof data[i].onBeforeShow === 'function') {
 				// if onBeforeShow returns false element will be skipped
-				if(!data[i].onBeforeShow(trigger, data[i])){
+				if(!data[i].onBeforeShow(currentContextSelector, data[i])){
 					continue;
 				}
 			}
@@ -124,7 +130,7 @@ context = (function () {
 				}
 				$menu.append($sub);
 				if (typeof data[i].subMenu != 'undefined') {
-					var subMenuData = buildMenu(trigger. data[i].subMenu, id, true);
+					var subMenuData = buildMenu(data[i].subMenu, id, true);
 					$menu.find('li:last').append(subMenuData);
 				}
 			}
@@ -144,23 +150,20 @@ context = (function () {
 			e.preventDefault();
 			e.stopPropagation();
 	        
+            currentContextSelector = $(this);
+			
 			$('.dropdown-context:not(.dropdown-context-sub)').hide();
 			
 	        $('#dropdown-' + id).remove();
 	       
-            $menu = buildMenu(e, data, id);
+            $menu = buildMenu(data, id);
             $('body').append($menu);
-			
-            currentContextSelector = $(this);
-
-			
-
 
             $menu.find('.dynamic-menu-item').remove(); // Destroy any old dynamic menu items
             $menu.find('.dynamic-menu-src').each(function(idx, element) {
                 var menuItems = window[$(element).data('src')]($(selector));
                 $parentMenu = $(element).closest('.dropdown-menu.dropdown-context');
-                $parentMenu = buildMenuItems(e, $parentMenu, menuItems, id, undefined, true);
+                $parentMenu = buildMenuItems($parentMenu, menuItems, id, undefined, true);
             });
 
 			if (typeof options.above == 'boolean' && options.above) {
@@ -211,9 +214,3 @@ context = (function () {
 		destroy: destroyContext
 	};
 })();
-
-var createCallback = function(func) {
-    return function(event) { func(event, currentContextSelector) };
-}
-
-currentContextSelector = undefined;
