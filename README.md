@@ -17,3 +17,61 @@ context.init({
 | above                | string || boolean | 'auto'  | If set to 'auto' menu will appear as a 'dropup' if there is not enough room below it. Settings to true will make the menu a 'popup' by default |
 | preventDoubleContext | boolean           | true    | If set to true, browser-based context menus will not work on contextjs menus.                                                                  |
 | compress             | boolean           | false   | If set to true, context menus will have less padding, making them (hopefully) more unobstrutive                                                |
+
+## Updating Settings
+```
+context.settings({initSettings});
+```
+
+## Attaching
+```
+ext.attach(selector, [menuObjects]);
+```
+
+## Destroying
+```
+context.destroy(selector);
+```
+
+## Menu Object
+
+### Headers
+```
+{
+	header: 'My Header Title'
+}
+```
+
+### Anchor Links
+```
+{
+	text: 'My Link Title', 
+	href: 'http://contextjs.com/', 
+	target: '_blank'
+}
+```
+### Dividers
+```
+{
+	divider: true
+}
+```
+
+### Event Based Actions
+```
+{
+    text: 'Event Based Link',
+    action: function(e){
+    	e.preventDefault();
+        alert('Do Something');
+    }
+}
+```
+
+### Sub-Menus
+```
+{
+    text: 'My Sub-menu',
+    subMenu: [menuObjects]
+}
+```
