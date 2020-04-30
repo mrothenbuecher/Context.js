@@ -1,29 +1,19 @@
 # Context.js
 
-<a href="http://lab.jakiestfu.com/contextjs/" target="_blank">Visit the Website, lab.jakiestfu.com/contextjs/</a>
-
-
-## About
-
-Context.js is a lightweight solution for contextual menus. Currently, there are two versions.
-
-The first is to be used <i>with</i> <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitters Bootstrap</a> (bootstrap.css specifically). If you do not use or want to use bootstrap.css, there is a standalone stylesheet to give the menu it's base styles.
-
-
-## Features
-
-<ul>
-	<li>Linted: Valid JS</li>
-	<li>Can be used with or without Twitters Bootstrap.css</li>
-    <li>Icon support for menu items with Twitter Bootstrap icons</li>
-	<li>Event Based Links</li>
-	<li>Anchor Links</li>
-	<li>Headers</li>
-	<li>Dividers</li>
-	<li>Recursive Menus (infinite depth)</li>
-	<li>Vertical Space Detection (turns into a "dropup")</li>
-	<li>Horizontal Space Detection (Drops to the left instead of right)</li>
-	<li>Add/Delete menus Dynamically</li>
-	<li>Even works on <a href="http://google.com" class="inline-menu">Inline Links</a></li>
-    <li>Dynamic menu items through callbacks during menu creation</li>
-</ul>
+## Initializing
+```js
+context.init({
+    fadeSpeed: 100,
+    filter: function ($obj){},
+    above: 'auto',
+    preventDoubleContext: true,
+    compress: false
+});
+```
+| Parameter            | Type              | Default | Description                                                                                                                                    |
+|----------------------|-------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| fadeSpeed            | int               | 100     | The speed in which the context menu fades in (in ms)                                                                                           |
+| filter               | function          | null    | Function that each finished list element will pass through for extra modification                                                              |
+| above                | string || boolean | 'auto'  | If set to 'auto' menu will appear as a 'dropup' if there is not enough room below it. Settings to true will make the menu a 'popup' by default |
+| preventDoubleContext | boolean           | true    | If set to true, browser-based context menus will not work on contextjs menus.                                                                  |
+| compress             | boolean           | false   | If set to true, context menus will have less padding, making them (hopefully) more unobstrutive                                                |
