@@ -25,7 +25,7 @@ context.settings({initSettings});
 
 ## Attaching
 ```
-ext.attach(selector, [menuObjects]);
+context.attach(selector, [menuObjects]);
 ```
 
 ## Destroying
